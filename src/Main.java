@@ -5,7 +5,8 @@ public class Main {
         Scanner scan = new Scanner(System.in);
         int pilihan;
 
-        Transaksi asu = new Transaksi(100, "sdas", today);
+        Transaksi user;
+        LaporanKeuangan tulis = new LaporanKeuangan();
 
         do {
             System.out.println("=== Financial Tracker ===");
@@ -19,14 +20,17 @@ public class Main {
 
             switch (pilihan) {
                 case 1:
-                    Transaksi.inputTransaksi();
+                    user = new Pemasukan(0,"");//default inputan
+                    user.inputTransaksi();
+                    tulis.writePemasukkan(user.getInputJumlah(), user.getKategori());//menulis pemasukkan ke filehandling
                     break;
                 case 2:
-                    Transaksi.inputTransaksi();
-                    //belum jadi
+                    user = new Pengeluaran(0,"");
+                    user.inputTransaksi();
+                    tulis.writePengeluaran(user.getInputJumlah(), user.getKategori());//menulis pengeluaran ke filehandling
                     break;
                 case 3:
-                    System.out.println("Laporan Keuangan (belumjadi)");
+                    tulis.displayLaporan();
                     break;
                 case 4:
                     System.out.println("Keluar");
