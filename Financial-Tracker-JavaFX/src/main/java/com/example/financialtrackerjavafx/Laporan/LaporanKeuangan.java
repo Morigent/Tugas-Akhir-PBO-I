@@ -1,45 +1,45 @@
 package com.example.financialtrackerjavafx.Laporan;
 
 import java.io.*;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class LaporanKeuangan {
-    private final String fileName = "laporan_keuangan.CSV";
+    private final String filePemasukan = "Pemasukan.CSV";
+    private final String filePengeluaran = "Pengeluaran.CSV";
 
     public void writePemasukkan(int inputJumlah, String kategori) {
-        writeToFile("Transaksi.Pemasukan", inputJumlah, kategori);
-    }
-
-    public void writePengeluaran(int inputJumlah, String kategori) {
-        writeToFile("Transaksi.Pengeluaran", inputJumlah, kategori);
-    }
-
-    private void writeToFile(String tipe, int jumlah, String kategori) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, true))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePemasukan, true))) {
             String waktu = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
             LocalDate tanggal = LocalDate.now();
+            String formatted = NumberFormat.getCurrencyInstance().format(inputJumlah);
 
-            String data = String.format("%s, Rp.%d, %s, %s %s\n", tipe, jumlah, kategori, tanggal, waktu);
+            String data = String.format("Rp.%d, %s, %s %s\n",  formatted, kategori, tanggal, waktu);
             bw.write(data);
 
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             System.out.println("Gagal menyimpan data: " + e.getMessage());
         }
     }
 
-    public void displayLaporan() {
-        System.out.println("\n===== Laporan Keuangan =====");
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String baris;
-            while ((baris = br.readLine()) != null) {
-                System.out.println(baris);
-            }
-        } catch (IOException e) {
-            System.out.println("Tidak ada laporan tersedia atau file tidak ditemukan.");
+    public void writePengeluaran(int inputJumlah, String kategori) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePengeluaran, true))) {
+            String waktu = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
+            LocalDate tanggal = LocalDate.now();
+            String formatted = NumberFormat.getCurrencyInstance().format(inputJumlah);
+
+            String data = String.format("Rp.%d, %s, %s %s\n",  formatted, kategori, tanggal, waktu);
+            bw.write(data);
+
+
         }
-        System.out.println("============================\n");
+        catch (IOException e) {
+            System.out.println("Gagal menyimpan data: " + e.getMessage());
+        }
     }
+
 }

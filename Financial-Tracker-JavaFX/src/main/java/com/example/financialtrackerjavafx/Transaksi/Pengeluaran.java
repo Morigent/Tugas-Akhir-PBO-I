@@ -16,17 +16,7 @@ public class Pengeluaran extends Transaksi{
 
     @Override
     public void inputTransaksi() {
-        Scanner input = new Scanner(System.in);
-        System.out.print("Masukkan jumlah pengeluaran: ");
-        inputJumlah = input.nextInt();
-        input.nextLine();
-        System.out.print("Masukkan Kategori Transaksi.Pengeluaran: ");
-        kategori = input.nextLine();
 
-        setInputJumlah(inputJumlah);
-        setKategori(kategori);
-
-        rincianTransaksi();
     }
 
     @Override

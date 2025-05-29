@@ -35,7 +35,7 @@ public class Main {
                     tulis.writePengeluaran(user.getInputJumlah(), user.getKategori());//menulis pengeluaran ke filehandling
                     break;
                 case 3:
-                    tulis.displayLaporan();
+                    // tulis.displayLaporan();
                     break;
                 case 4:
                     System.out.println("Keluar");

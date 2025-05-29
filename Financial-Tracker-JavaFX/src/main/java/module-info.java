@@ -12,9 +12,6 @@ module com.example.financialtrackerjavafx {
     requires com.almasb.fxgl.all;
 
     opens com.example.financialtrackerjavafx to javafx.fxml;
-    exports com.example.financialtrackerjavafx;
-    exports com.example.financialtrackerjavafx;
-    opens com.example.financialtrackerjavafx to javafx.fxml;
     exports com.example.financialtrackerjavafx.Transaksi;
     opens com.example.financialtrackerjavafx.Transaksi to javafx.fxml;
     exports com.example.financialtrackerjavafx.Menu;

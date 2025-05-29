@@ -1,5 +1,15 @@
 package com.example.financialtrackerjavafx.Transaksi;
 
+import com.example.financialtrackerjavafx.Laporan.LaporanKeuangan;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -21,22 +31,42 @@ public class Pemasukan extends Transaksi {
 
     @Override
     public void inputTransaksi() {
-        Scanner input = new Scanner(System.in);
-        System.out.print("Masukkan jumlah Pemasukkan: ");
-        try {
-            inputJumlah = input.nextInt();
-            input.nextLine();
-            System.out.print("Masukkan Kategori Pemasukkan: ");
-            kategori = input.nextLine();
+        VBox root = new VBox(10);
+        root.setAlignment(Pos.CENTER);
+        Separator separator = new Separator();
+        HBox hbox = new HBox(10);
+        root.setAlignment(Pos.CENTER);
 
-            setInputJumlah(inputJumlah);
-            setKategori(kategori);
+        TextField inJumlah = new TextField();
+        inJumlah.setPromptText("Jumlah Pemasukkan");
 
-            rincianTransaksi();
-        }
-        catch (InputMismatchException e){
-            System.out.println(e.getMessage() + ": Input Invalid");
-        }
+        inJumlah.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                inJumlah.setText(oldValue);
+            }
+        });
+
+        TextField inKategori =new TextField();
+        inKategori.setPromptText("Kategori");
+
+        Button submit =  new Button("Submit");
+
+        root.getChildren().addAll(inJumlah, inKategori,submit,hbox);
+
+
+
+        Scene scene = new Scene(root, 300, 200);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.show();
+
+        submit.setOnAction(event -> {
+            inputJumlah = Integer.parseInt(inJumlah.getText());
+            kategori = inKategori.getText();
+
+            LaporanKeuangan pemasukkan = new LaporanKeuangan();
+            pemasukkan.writePemasukkan(inputJumlah, kategori);
+        });
     }
 
     @Override
