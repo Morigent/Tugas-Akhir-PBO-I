@@ -1,17 +1,19 @@
+package Laporan;
+
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-class LaporanKeuangan {
+public class LaporanKeuangan {
     private final String fileName = "laporan_keuangan.CSV";
 
     public void writePemasukkan(int inputJumlah, String kategori) {
-        writeToFile("Pemasukan", inputJumlah, kategori);
+        writeToFile("Transaksi.Pemasukan", inputJumlah, kategori);
     }
 
     public void writePengeluaran(int inputJumlah, String kategori) {
-        writeToFile("Pengeluaran", inputJumlah, kategori);
+        writeToFile("Transaksi.Pengeluaran", inputJumlah, kategori);
     }
 
     private void writeToFile(String tipe, int jumlah, String kategori) {
@@ -19,7 +21,7 @@ class LaporanKeuangan {
             String waktu = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
             LocalDate tanggal = LocalDate.now();
 
-            String data = String.format("%s | Rp.%d | %s | %s %s\n", tipe, jumlah, kategori, tanggal, waktu);
+            String data = String.format("%s, Rp.%d, %s, %s %s\n", tipe, jumlah, kategori, tanggal, waktu);
             bw.write(data);
 
 

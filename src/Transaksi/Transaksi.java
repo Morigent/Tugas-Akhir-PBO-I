@@ -1,8 +1,6 @@
+package Transaksi;
 
-import java.time.LocalTime;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
 
 public abstract class Transaksi {
     private int inputJumlah;

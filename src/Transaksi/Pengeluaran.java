@@ -1,3 +1,5 @@
+package Transaksi;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -18,7 +20,7 @@ public class Pengeluaran extends Transaksi{
         System.out.print("Masukkan jumlah pengeluaran: ");
         inputJumlah = input.nextInt();
         input.nextLine();
-        System.out.print("Masukkan Kategori Pengeluaran: ");
+        System.out.print("Masukkan Kategori Transaksi.Pengeluaran: ");
         kategori = input.nextLine();
 
         setInputJumlah(inputJumlah);
@@ -34,7 +36,7 @@ public class Pengeluaran extends Transaksi{
         String waktuFormatted = sekarang.format(formatter);
         System.out.println("Waktu sekarang: " + waktuFormatted);
         System.out.println("\n=====================================");
-        System.out.println("Jumlah Transaksi: Rp." + inputJumlah);
+        System.out.println("Jumlah Transaksi.Transaksi: Rp." + inputJumlah);
         System.out.println("Kategori        : "  + kategori);
         System.out.println("Tanggal & Waktu : " + getToday() + ", " + waktuFormatted);
         System.out.println("=====================================\n");
