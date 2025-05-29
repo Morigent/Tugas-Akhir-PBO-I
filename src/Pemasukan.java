@@ -25,6 +25,9 @@ public class Pemasukan extends Transaksi {
         System.out.print("Masukkan Kategori Pemasukkan: ");
         kategori = input.nextLine();
 
+        setInputJumlah(inputJumlah);
+        setKategori(kategori);
+
         rincianTransaksi();
     }
 

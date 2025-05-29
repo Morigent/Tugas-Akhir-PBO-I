@@ -1,0 +1,5 @@
+Pengeluaran | Rp.2000 | parkir | 2025-05-12 20:37
+
+Pemasukan | Rp.2000000 | gajian | 2025-05-12 20:50
+Pengeluaran | Rp.2000 | parkir | 2025-05-12 20:50
+Pemasukan | Rp.20000 | tf an | 2025-05-12 20:56

@@ -20,6 +20,11 @@ public class Pengeluaran extends Transaksi{
         input.nextLine();
         System.out.print("Masukkan Kategori Pengeluaran: ");
         kategori = input.nextLine();
+
+        setInputJumlah(inputJumlah);
+        setKategori(kategori);
+
+        rincianTransaksi();
     }
 
     @Override

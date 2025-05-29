@@ -1,12 +1,13 @@
+
 import java.time.LocalTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public abstract class Transaksi {
-    private static int inputJumlah;
-    private static String kategori;
-    private static LocalDate today = LocalDate.now();
+    private int inputJumlah;
+    private String kategori;
+    private  LocalDate today = LocalDate.now();
 
     // Constructor
     public Transaksi (int inputJumlah, String kategori){
