@@ -12,13 +12,23 @@ public class LaporanKeuangan {
     private final String filePengeluaran = "Pengeluaran.CSV";
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
 
+    public LaporanKeuangan() {
+        try {
+            new File(filePemasukan).createNewFile();
+            new File(filePengeluaran).createNewFile();
+        } catch (IOException e) {
+            System.err.println("Gagal membuat file: " + e.getMessage());
+        }
+    }
+
     public void writeTransaksi(int jumlah, String kategori, boolean isPemasukan) throws IOException {
         String filename = isPemasukan ? filePemasukan : filePengeluaran;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
             String waktu = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
             LocalDate tanggal = LocalDate.now();
-            String formattedAmount = currencyFormat.format(jumlah);
+            String formattedAmount = "Rp" + NumberFormat.getNumberInstance(Locale.US).format(jumlah) + ",00";
 
+            // Match the exact format in your Pemasukan.CSV
             String data = String.format("%s,%s,%s,%s\n",
                     formattedAmount, kategori, tanggal, waktu);
             bw.write(data);
@@ -44,7 +54,11 @@ public class LaporanKeuangan {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
-                data.add(line.split(","));
+                if (!line.trim().isEmpty()) {
+                    // Split on comma but ignore commas inside quoted values
+                    String[] parts = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                    data.add(parts);
+                }
             }
         }
         return data;

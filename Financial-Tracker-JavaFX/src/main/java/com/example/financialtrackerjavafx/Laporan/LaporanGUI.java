@@ -1,5 +1,6 @@
 package com.example.financialtrackerjavafx.Laporan;
 
+import com.example.financialtrackerjavafx.Transaksi.Transaksi;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -66,21 +67,29 @@ public class LaporanGUI {
         stage.show();
     }
 
-    private TableView<TransactionData> createTransactionTable() throws IOException {
-        TableView<TransactionData> table = new TableView<>();
-        ObservableList<TransactionData> data = FXCollections.observableArrayList();
+    private TableView<Transaksi> createTransactionTable() throws IOException {
+        TableView<Transaksi> table = new TableView<>();
+        ObservableList<Transaksi> data = FXCollections.observableArrayList();
 
         // Add income data
         List<String[]> pemasukan = laporan.getTransaksiData(true);
         for (String[] trans : pemasukan) {
-            data.add(new TransactionData(
-                    "Pemasukan",
-                    trans[0], // amount
-                    trans[1], // category
-                    trans[2], // date
-                    trans[3]  // time
-            ));
-        }
+            try {
+                // Parse the amount properly from "Rp10.000,00" format
+                String amountStr = trans[0].replace("Rp", "").replace(".", "").replace(",00", "");
+                String formattedAmount = "Rp" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(amountStr)) + ",00";
+
+                data.add(new Transaksi(
+                        "Pemasukan",
+                        formattedAmount,
+                        trans[1], // category
+                        trans[2], // date
+                        trans[3]  // time
+                ) {
+                });
+            } catch (Exception e) {
+                System.err.println("Error parsing transaction: " + Arrays.toString(trans));
+            }
 
         // Add expense data
         List<String[]> pengeluaran = laporan.getTransaksiData(false);
@@ -95,19 +104,19 @@ public class LaporanGUI {
         }
 
         // Create columns
-        TableColumn<TransactionData, String> typeCol = new TableColumn<>("Jenis");
+        TableColumn<Transaksi, String> typeCol = new TableColumn<>("Jenis");
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
 
-        TableColumn<TransactionData, String> amountCol = new TableColumn<>("Jumlah");
+        TableColumn<Transaksi, String> amountCol = new TableColumn<>("Jumlah");
         amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
 
-        TableColumn<TransactionData, String> categoryCol = new TableColumn<>("Kategori");
+        TableColumn<Transaksi, String> categoryCol = new TableColumn<>("Kategori");
         categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
 
-        TableColumn<TransactionData, String> dateCol = new TableColumn<>("Tanggal");
+        TableColumn<Transaksi, String> dateCol = new TableColumn<>("Tanggal");
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-        TableColumn<TransactionData, String> timeCol = new TableColumn<>("Waktu");
+        TableColumn<Transaksi, String> timeCol = new TableColumn<>("Waktu");
         timeCol.setCellValueFactory(new PropertyValueFactory<>("time"));
 
         table.getColumns().addAll(typeCol, amountCol, categoryCol, dateCol, timeCol);
