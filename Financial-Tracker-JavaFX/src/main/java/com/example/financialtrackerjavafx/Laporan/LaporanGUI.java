@@ -12,11 +12,11 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -80,48 +80,57 @@ public class LaporanGUI {
                 String formattedAmount = "Rp" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(amountStr)) + ",00";
 
                 data.add(new Transaksi(
-                        "Pemasukan",
-                        formattedAmount,
-                        trans[1], // category
-                        trans[2], // date
-                        trans[3]  // time
+                        // category
+                        // date
+                        // time
                 ) {
+                    @Override
+                    public void inputTransaksi() {
+
+                    }
+
+                    @Override
+                    public void rincianTransaksi() {
+
+                    }
                 });
             } catch (Exception e) {
                 System.err.println("Error parsing transaction: " + Arrays.toString(trans));
             }
 
-        // Add expense data
-        List<String[]> pengeluaran = laporan.getTransaksiData(false);
-        for (String[] trans : pengeluaran) {
-            data.add(new TransactionData(
-                    "Pengeluaran",
-                    trans[0], // amount
-                    trans[1], // category
-                    trans[2], // date
-                    trans[3]  // time
-            ));
+            // Add expense data
+            List<String[]> pengeluaran = laporan.getTransaksiData(false);
+            for (String[] tran : pengeluaran) {
+                data.add(new TransactionData(
+                        "Pengeluaran",
+                        tran[0], // amount
+                        tran[1], // category
+                        tran[2], // date
+                        tran[3]  // time
+                ));
+            }
+
+            // Create columns
+            TableColumn<Transaksi, String> typeCol = new TableColumn<>("Jenis");
+            typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+
+            TableColumn<Transaksi, String> amountCol = new TableColumn<>("Jumlah");
+            amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
+
+            TableColumn<Transaksi, String> categoryCol = new TableColumn<>("Kategori");
+            categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+            TableColumn<Transaksi, String> dateCol = new TableColumn<>("Tanggal");
+            dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
+
+            TableColumn<Transaksi, String> timeCol = new TableColumn<>("Waktu");
+            timeCol.setCellValueFactory(new PropertyValueFactory<>("time"));
+
+            table.getColumns().addAll(typeCol, amountCol, categoryCol, dateCol, timeCol);
+            table.setItems(data);
+
+
         }
-
-        // Create columns
-        TableColumn<Transaksi, String> typeCol = new TableColumn<>("Jenis");
-        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-
-        TableColumn<Transaksi, String> amountCol = new TableColumn<>("Jumlah");
-        amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
-
-        TableColumn<Transaksi, String> categoryCol = new TableColumn<>("Kategori");
-        categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-
-        TableColumn<Transaksi, String> dateCol = new TableColumn<>("Tanggal");
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
-
-        TableColumn<Transaksi, String> timeCol = new TableColumn<>("Waktu");
-        timeCol.setCellValueFactory(new PropertyValueFactory<>("time"));
-
-        table.getColumns().addAll(typeCol, amountCol, categoryCol, dateCol, timeCol);
-        table.setItems(data);
-
         return table;
     }
 
@@ -149,28 +158,5 @@ public class LaporanGUI {
 
         barChart.getData().addAll(incomeSeries, expenseSeries);
         return barChart;
-    }
-
-    public static class TransactionData {
-        private final String type;
-        private final String amount;
-        private final String category;
-        private final String date;
-        private final String time;
-
-        public TransactionData(String type, String amount, String category, String date, String time) {
-            this.type = type;
-            this.amount = amount;
-            this.category = category;
-            this.date = date;
-            this.time = time;
-        }
-
-        // Getters
-        public String getType() { return type; }
-        public String getAmount() { return amount; }
-        public String getCategory() { return category; }
-        public String getDate() { return date; }
-        public String getTime() { return time; }
     }
 }

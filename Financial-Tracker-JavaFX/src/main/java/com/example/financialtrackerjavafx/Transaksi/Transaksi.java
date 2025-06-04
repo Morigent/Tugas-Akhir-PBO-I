@@ -13,6 +13,11 @@ public abstract class Transaksi {
         this.kategori = kategori;
     }
 
+    public Transaksi() {
+
+
+    }
+
     // Getter
     public int getInputJumlah() {
         return inputJumlah;
