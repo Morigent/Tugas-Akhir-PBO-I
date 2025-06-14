@@ -38,7 +38,11 @@ public class Home {
         Label title = new Label("Financial Tracker");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #ECEFCA;");
 
-        saldoLabel = new Label("Saldo saat ini: Rp.0");
+        try {
+            saldoLabel = new Label("Saldo saat ini: Rp." + formatCurrency(transactionService.calculateBalance()));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         saldoLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #ECEFCA;");
 
         HBox buttonBox = new HBox(15);
@@ -179,10 +183,11 @@ public class Home {
         grid.setPadding(new Insets(20, 10, 10, 10));
 
         TextField amountField = new TextField();
-        amountField.setPromptText("Jumlah");
-        ComboBox<String> categoryCombo = new ComboBox<>();
+        amountField.setPromptText("dalam rupiah");
+        TextField categoryField = new TextField();
+        categoryField.setPromptText("Gaji/Bonus/dll...");
         TextArea descriptionArea = new TextArea();
-        descriptionArea.setPromptText("Deskripsi");
+        descriptionArea.setPromptText("Endorse an");
         descriptionArea.setPrefRowCount(3);
         DatePicker datePicker = new DatePicker();
 
@@ -194,19 +199,11 @@ public class Home {
             datePicker.setValue(LocalDate.now());
         }
 
-        try {
-            categoryCombo.getItems().addAll(transactionService.getCategories());
-            if (existingTransaction != null) {
-                categoryCombo.setValue(existingTransaction.getKategori());
-            }
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Gagal memuat kategori");
-        }
 
         grid.add(new Label("Jumlah:"), 0, 0);
         grid.add(amountField, 1, 0);
         grid.add(new Label("Kategori:"), 0, 1);
-        grid.add(categoryCombo, 1, 1);
+        grid.add(categoryField, 1, 1);
         grid.add(new Label("Deskripsi:"), 0, 2);
         grid.add(descriptionArea, 1, 2);
         grid.add(new Label("Tanggal:"), 0, 3);
@@ -217,14 +214,14 @@ public class Home {
         dialog.setResultConverter(buttonType -> {
             if (buttonType == saveButtonType) {
                 try {
-                    if (!InputValidator.validateTransaction(amountField.getText(), categoryCombo.getValue())) {
+                    if (!InputValidator.validateTransaction(amountField.getText(), categoryField.getText())) {
                         showAlert(Alert.AlertType.ERROR, "Input Tidak Valid",
                                 "Jumlah harus positif dan kategori harus diisi");
                         return null;
                     }
 
                     double amount = Double.parseDouble(amountField.getText());
-                    String category = categoryCombo.getValue();
+                    String category = categoryField.getText();
                     String description = descriptionArea.getText();
                     LocalDate date = datePicker.getValue();
 
