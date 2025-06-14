@@ -10,8 +10,6 @@ public class Transaksi {
     private String deskripsi;
     private LocalDate tanggal;
 
-    public Transaksi() {}
-
     public Transaksi(String jenis, double jumlah, String kategori, String deskripsi, LocalDate tanggal) {
         this.jenis = jenis;
         this.jumlah = jumlah;

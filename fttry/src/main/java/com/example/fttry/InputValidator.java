@@ -15,11 +15,11 @@ public class InputValidator {
         }
     }
 
-    public static String formatAmount(String amount) {
+    /*public static String formatAmount(String amount) {
         try {
             return String.format("%.2f", Double.parseDouble(amount));
         } catch (NumberFormatException e) {
             return "0.00";
         }
-    }
+    }*/
 }

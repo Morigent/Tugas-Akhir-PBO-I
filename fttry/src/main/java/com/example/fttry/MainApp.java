@@ -11,34 +11,34 @@ public class MainApp extends Application {
             // Initialize database
             DatabaseHelper.getInstance();
 
-            // Setup main window
             primaryStage.setTitle("Financial Tracker");
             primaryStage.setScene(Home.getInstance().getScene());
             primaryStage.setMinWidth(900);
             primaryStage.setMinHeight(650);
             primaryStage.show();
-
-            // Close database connection when application exits
-            primaryStage.setOnCloseRequest(e -> {
-                DatabaseHelper.getInstance().closeConnection();
-            });
         } catch (Exception e) {
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Failed to start application");
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            showErrorAlert("Failed to start application", e.getMessage());
         }
     }
 
     public static void main(String[] args) {
         try {
-            Class.forName("org.sqlite.JDBC");
+            // Add shutdown hook to close database connection
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                DatabaseHelper.getInstance().closeConnection();
+            }));
+
             launch(args);
-        } catch (ClassNotFoundException e) {
-            System.err.println("SQLite JDBC driver not found");
-            e.printStackTrace();
+        } catch (Exception e) {
+            showErrorAlert("Application Error", e.getMessage());
         }
+    }
+
+    private static void showErrorAlert(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

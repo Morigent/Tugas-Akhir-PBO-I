@@ -9,10 +9,11 @@ public class DatabaseHelper {
 
     private DatabaseHelper() {
         try {
-            Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(DB_URL);
+            // Pastikan auto-commit sesuai kebutuhan
+            connection.setAutoCommit(true); // Default untuk SQLite
             createTables();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database", e);
         }
     }
@@ -24,8 +25,8 @@ public class DatabaseHelper {
         return instance;
     }
 
-    private void createTables() {
-        String createTransaksiTable = "CREATE TABLE IF NOT EXISTS transaksi (" +
+    private void createTables() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS transaksi (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "jenis TEXT NOT NULL CHECK (jenis IN ('Pemasukkan', 'Pengeluaran'))," +
                 "jumlah REAL NOT NULL CHECK (jumlah > 0)," +
@@ -34,14 +35,27 @@ public class DatabaseHelper {
                 "tanggal TEXT NOT NULL)";
 
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute(createTransaksiTable);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create tables", e);
+            stmt.execute(sql);
         }
     }
 
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(DB_URL);
+            connection.setAutoCommit(true); // Pastikan konsisten
+        }
         return connection;
+    }
+
+    public void executeTransaction(String sql, Object... params) throws SQLException {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < params.length; i++) {
+                pstmt.setObject(i + 1, params[i]);
+            }
+            pstmt.executeUpdate();
+        }
     }
 
     public void closeConnection() {
@@ -51,15 +65,6 @@ public class DatabaseHelper {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void executeTransaction(String sql, Object... params) throws SQLException {
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                pstmt.setObject(i + 1, params[i]);
-            }
-            pstmt.executeUpdate();
         }
     }
 }

@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionService {
-    private final DatabaseHelper dbHelper;
+    private final DatabaseHelper dbHelper =DatabaseHelper.getInstance();
 
-    public TransactionService() {
-        dbHelper = DatabaseHelper.getInstance();
-    }
 
     public void addTransaction(Transaksi transaksi) throws SQLException {
         String sql = "INSERT INTO transaksi(jenis, jumlah, kategori, deskripsi, tanggal) VALUES(?,?,?,?,?)";
