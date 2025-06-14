@@ -11,6 +11,7 @@ module com.example.fttry {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires java.sql;
+    requires javafx.media;
 
     opens com.example.fttry to javafx.fxml;
     exports com.example.fttry;
