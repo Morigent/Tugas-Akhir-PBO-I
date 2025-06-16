@@ -4,6 +4,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class TransactionService {
     private final DatabaseHelper dbHelper =DatabaseHelper.getInstance();
@@ -88,5 +90,55 @@ public class TransactionService {
             }
         }
         return categories;
+    }
+
+    public Map<String, Integer> getTransactionSummary() {
+        return null;
+    }
+
+    public Map<String, Integer> getTransactionSummaryByCategory() {
+        return Map.of();
+    }
+
+    public Map<LocalDate, Double> getMonthlyIncome() throws SQLException {
+        Map<LocalDate, Double> incomeMap = new TreeMap<>();
+        String sql = "SELECT date(tanggal, 'start of month') as month, SUM(jumlah) as total " +
+                "FROM transaksi WHERE jenis = 'Pemasukkan' " +
+                "GROUP BY strftime('%Y-%m', tanggal) " +
+                "ORDER BY month";
+
+        try (Connection conn = dbHelper.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                incomeMap.put(
+                        LocalDate.parse(rs.getString("month")),
+                        rs.getDouble("total")
+                );
+            }
+        }
+        return incomeMap;
+    }
+
+    public Map<LocalDate, Double> getMonthlyExpenses() throws SQLException {
+        Map<LocalDate, Double> expenseMap = new TreeMap<>();
+        String sql = "SELECT date(tanggal, 'start of month') as month, SUM(jumlah) as total " +
+                "FROM transaksi WHERE jenis = 'Pengeluaran' " +
+                "GROUP BY strftime('%Y-%m', tanggal) " +
+                "ORDER BY month";
+
+        try (Connection conn = dbHelper.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                expenseMap.put(
+                        LocalDate.parse(rs.getString("month")),
+                        rs.getDouble("total")
+                );
+            }
+        }
+        return expenseMap;
     }
 }

@@ -16,6 +16,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.InputStream;
@@ -27,8 +28,10 @@ import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.sql.*;
+import java.util.TreeMap;
 
 public class Home {
     private static final Home instance = new Home();
@@ -63,9 +66,42 @@ public class Home {
         Button incomeBtn = createStyledButton("Pemasukkan");
         Button expenseBtn = createStyledButton("Pengeluaran");
         Button filterBtn = createStyledButton("Filter");
+        Button comparisonBtn = createStyledButton("Perbandingan");
+        comparisonBtn.setOnAction(e -> {
+            try {
+                TransactionService service = new TransactionService();
+                Map<LocalDate, Double> income = service.getMonthlyIncome();
+                Map<LocalDate, Double> expenses = service.getMonthlyExpenses();
 
+                if (income.isEmpty() && expenses.isEmpty()) {
+                    showAlert(Alert.AlertType.INFORMATION, "Tidak ada data",
+                            "Belum ada data pemasukkan atau pengeluaran untuk ditampilkan");
+                } else {
+                    // Add zero values for months that only have one type of transaction
+                    TreeMap<LocalDate, Double> completeIncome = new TreeMap<>();
+                    TreeMap<LocalDate, Double> completeExpenses = new TreeMap<>();
 
-        buttonBox.getChildren().addAll(incomeBtn, expenseBtn, filterBtn);
+                    // Combine all dates
+                    TreeMap<LocalDate, Double> allDates = new TreeMap<>();
+                    allDates.putAll(income);
+                    allDates.putAll(expenses);
+
+                    // Fill in zeros where needed
+                    for (LocalDate date : allDates.keySet()) {
+                        completeIncome.put(date, income.getOrDefault(date, 0.0));
+                        completeExpenses.put(date, expenses.getOrDefault(date, 0.0));
+                    }
+
+                    IncomeExpenseComparisonChart.showChart(completeIncome, completeExpenses);
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Error",
+                        "Gagal memuat data perbandingan: " + ex.getMessage());
+            }
+        });
+
+        buttonBox.getChildren().addAll(incomeBtn, expenseBtn, filterBtn, comparisonBtn);
 
         VBox headerBox = new VBox(15, title, saldoLabel, buttonBox);
         headerBox.setStyle("-fx-background-color: #282829; -fx-background-radius: 20; -fx-padding: 20;");
