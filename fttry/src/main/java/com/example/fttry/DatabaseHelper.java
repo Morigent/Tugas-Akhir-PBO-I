@@ -37,6 +37,17 @@ public class DatabaseHelper {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(sql);
         }
+        String savingsTable = "CREATE TABLE IF NOT EXISTS savings_targets (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "name TEXT NOT NULL," +
+                "target_amount REAL NOT NULL CHECK (target_amount > 0)," +
+                "current_amount REAL NOT NULL DEFAULT 0," +
+                "target_date TEXT NOT NULL," +
+                "created_at TEXT NOT NULL)";
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(savingsTable);
+        }
     }
 
     public Connection getConnection() throws SQLException {

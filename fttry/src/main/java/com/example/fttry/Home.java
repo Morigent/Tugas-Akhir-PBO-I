@@ -2,6 +2,7 @@ package com.example.fttry;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -27,11 +28,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
 import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.sql.*;
-import java.util.TreeMap;
 
 public class Home {
     private static final Home instance = new Home();
@@ -66,6 +64,10 @@ public class Home {
         Button incomeBtn = createStyledButton("Pemasukkan");
         Button expenseBtn = createStyledButton("Pengeluaran");
         Button filterBtn = createStyledButton("Filter");
+        Button savingsBtn = createStyledButton("Target Tabungan");
+        Button viewSavingsBtn = createStyledButton("Lihat Target");
+        viewSavingsBtn.setOnAction(e -> showSavingsTargetsList());
+        savingsBtn.setOnAction(e -> showSavingsTargetDialog());
         Button comparisonBtn = createStyledButton("Perbandingan");
         comparisonBtn.setOnAction(e -> {
             try {
@@ -101,7 +103,7 @@ public class Home {
             }
         });
 
-        buttonBox.getChildren().addAll(incomeBtn, expenseBtn, filterBtn, comparisonBtn);
+        buttonBox.getChildren().addAll(incomeBtn, expenseBtn, filterBtn, comparisonBtn, savingsBtn, viewSavingsBtn);
 
         VBox headerBox = new VBox(15, title, saldoLabel, buttonBox);
         headerBox.setStyle("-fx-background-color: #282829; -fx-background-radius: 20; -fx-padding: 20;");
@@ -549,6 +551,170 @@ public class Home {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+
+    // Tambahkan method untuk menampilkan dialog target tabungan
+    private void showSavingsTargetDialog() {
+        Dialog<SavingsTarget> dialog = new Dialog<>();
+        dialog.setTitle("Kelola Target Tabungan");
+
+        ButtonType addButtonType = new ButtonType("Tambah", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 10, 10, 10));
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Nama Target");
+        TextField amountField = new TextField();
+        amountField.setPromptText("Jumlah Target");
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(LocalDate.now().plusMonths(1));
+
+        grid.add(new Label("Nama Target:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Jumlah Target:"), 0, 1);
+        grid.add(amountField, 1, 1);
+        grid.add(new Label("Target Tanggal:"), 0, 2);
+        grid.add(datePicker, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == addButtonType) {
+                try {
+                    String name = nameField.getText();
+                    double amount = Double.parseDouble(amountField.getText());
+                    LocalDate targetDate = datePicker.getValue();
+
+                    if (name.isEmpty() || amount <= 0 || targetDate.isBefore(LocalDate.now())) {
+                        showAlert(Alert.AlertType.ERROR, "Input Tidak Valid",
+                                "Pastikan semua field diisi dengan benar dan tanggal target valid");
+                        return null;
+                    }
+
+                    return new SavingsTarget(name, amount, targetDate);
+                } catch (NumberFormatException e) {
+                    showAlert(Alert.AlertType.ERROR, "Input Tidak Valid", "Jumlah harus berupa angka");
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        Optional<SavingsTarget> result = dialog.showAndWait();
+        result.ifPresent(target -> {
+            try {
+                new SavingsTargetService().addSavingsTarget(target);
+                showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Target tabungan ditambahkan");
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Gagal menambahkan target tabungan");
+            }
+        });
+    }
+
+    // Di Home.java
+    private void showSavingsTargetsList() {
+        try {
+            List<SavingsTarget> targets = new SavingsTargetService().getAllSavingsTargets();
+
+            if (targets.isEmpty()) {
+                showAlert(Alert.AlertType.INFORMATION, "Target Tabungan", "Belum ada target tabungan");
+                return;
+            }
+
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Daftar Target Tabungan");
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+            TableView<SavingsTarget> table = new TableView<>();
+
+            // Kolom Nama
+            TableColumn<SavingsTarget, String> nameCol = new TableColumn<>("Nama");
+            nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+            // Kolom Target
+            TableColumn<SavingsTarget, Double> targetCol = new TableColumn<>("Target");
+            targetCol.setCellValueFactory(new PropertyValueFactory<>("targetAmount"));
+            targetCol.setCellFactory(tc -> new TableCell<>() {
+                @Override
+                protected void updateItem(Double amount, boolean empty) {
+                    super.updateItem(amount, empty);
+                    if (empty || amount == null) {
+                        setText(null);
+                    } else {
+                        setText(formatCurrency(amount));
+                    }
+                }
+            });
+
+            // Kolom Progress
+            TableColumn<SavingsTarget, String> progressCol = new TableColumn<>("Progress");
+            progressCol.setCellValueFactory(cell ->
+                    new SimpleStringProperty(cell.getValue().getProgress()));
+
+            // Kolom Aksi
+            TableColumn<SavingsTarget, Void> actionCol = new TableColumn<>("Aksi");
+            actionCol.setCellFactory(param -> new TableCell<>() {
+                private final Button addBtn = new Button("Tambah Dana");
+                {
+                    addBtn.setOnAction(event -> {
+                        SavingsTarget target = getTableView().getItems().get(getIndex());
+                        addFundsToTarget(target);
+                    });
+                }
+
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(addBtn);
+                    }
+                }
+            });
+
+            table.getColumns().addAll(nameCol, targetCol, progressCol, actionCol);
+            table.setItems(FXCollections.observableArrayList(targets));
+
+            VBox vbox = new VBox(10, table);
+            vbox.setPadding(new Insets(10));
+            dialog.getDialogPane().setContent(vbox);
+            dialog.showAndWait();
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Gagal memuat target tabungan");
+        }
+    }
+
+    private void addFundsToTarget(SavingsTarget target) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Tambah Dana");
+        dialog.setHeaderText("Masukkan jumlah yang ingin ditambahkan ke " + target.getName());
+        dialog.setContentText("Jumlah:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(amountStr -> {
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount <= 0) {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Jumlah harus positif");
+                    return;
+                }
+
+                new SavingsTargetService().addToSavings(target.getId(), amount);
+                showAlert(Alert.AlertType.INFORMATION, "Berhasil",
+                        String.format("Berhasil menambahkan Rp %,.0f ke %s", amount, target.getName()));
+                showSavingsTargetsList(); // Refresh list
+            } catch (NumberFormatException e) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Masukkan jumlah yang valid");
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Gagal menambahkan dana");
+            }
+        });
     }
 
     public static Home getInstance() {
